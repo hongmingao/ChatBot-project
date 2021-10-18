@@ -12,7 +12,6 @@
 ChatBot::ChatBot()
 {  
     // invalidate data handles
-    std::cout << "construct ChatBot without memory allocation. " << std::endl; 
     _image = nullptr;
     _chatLogic = nullptr;
     _rootNode = nullptr;
@@ -78,17 +77,17 @@ ChatBot::ChatBot(ChatBot &&source)
 {
     std::cout << "MOVING ChatBot content of instance " 
       << &source << " to instance " << this << std::endl;
+    _image = source._image;
     _chatLogic = source._chatLogic;
     _rootNode = source._rootNode;
     _currentNode = source._currentNode;
-    _image = new wxBitmap;
-    _image = source._image;
+    _chatLogic->SetChatbotHandle(this);
+  
     source._chatLogic = nullptr;
     source._rootNode = nullptr;
     source._currentNode = nullptr;
     if(source._image != NULL) // Attention: wxWidgets used NULL and not nullptr
     {
-        delete source._image;
         source._image = NULL;
     }
 }
@@ -99,20 +98,19 @@ ChatBot& ChatBot::operator=(ChatBot &&source)
       << &source << " to instance " << this << std::endl;
     if (this == &source) { return *this; }
     delete _image;
-    _chatLogic = source._chatLogic;
     _rootNode = source._rootNode;
     _currentNode = source._currentNode;
-    _image = new wxBitmap;
+    _chatLogic = source._chatLogic;
+    _chatLogic->SetChatbotHandle(this);
     _image = source._image;
+  
     source._chatLogic = nullptr;
     source._rootNode = nullptr;
     source._currentNode = nullptr;
     if(source._image != NULL) // Attention: wxWidgets used NULL and not nullptr
     {
-        delete source._image;
         source._image = NULL;
     }
-//     std::cout << "finished" << std::endl;
     return *this;
 }
 ////
@@ -163,9 +161,7 @@ void ChatBot::SetCurrentNode(GraphNode *node)
     std::uniform_int_distribution<int> dis(0, answers.size() - 1);
     std::string answer = answers.at(dis(generator));
 
-//     _chatLogic->SetChatbotHandle(node->getChatBotHandle());
     // send selected node answer to user
-    std::cout << "reached SendMessageToUser" << std::endl;
     _chatLogic->SendMessageToUser(answer);
 }
 
